@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Mototaxis</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#2563eb">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="icon-192.png">
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <!-- Estilos -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Loader -->
+    <div id="loader" class="loader">
+        <div class="spinner"></div>
+        <p>Cargando...</p>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <h1>🏍️ Mototaxis</h1>
+            <div class="header-actions">
+                <button id="btnRefresh" class="btn-icon" title="Actualizar">🔄</button>
+                <button id="btnNotifications" class="btn-icon" title="Notificaciones">
+                    🔔
+                    <span id="notificationBadge" class="badge hidden">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenedor Principal -->
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>Panel de Control</h2>
+                <button id="btnCloseSidebar" class="btn-close">✕</button>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="pedidos">📋 Pedidos</button>
+                <button class="tab-btn" data-tab="conductores">👤 Conductores</button>
+                <button class="tab-btn" data-tab="nuevo">➕ Nuevo Pedido</button>
+            </div>
+
+            <!-- Contenido de Tabs -->
+            <div class="tab-content">
+                <!-- Tab Pedidos -->
+                <div id="tab-pedidos" class="tab-pane active">
+                    <div class="filters">
+                        <select id="filterEstado" class="filter-select">
+                            <option value="">Todos los estados</option>
+                            <option value="pendiente">Pendiente</option>
+                            <option value="asignado">Asignado</option>
+                            <option value="en_camino">En Camino</option>
+                            <option value="completado">Completado</option>
+                            <option value="cancelado">Cancelado</option>
+                        </select>
+                        <input type="date" id="filterFecha" class="filter-input">
+                    </div>
+                    <div id="listaPedidos" class="lista-items">
+                        <!-- Se llenará dinámicamente -->
+                    </div>
+                </div>
+
+                <!-- Tab Conductores -->
+                <div id="tab-conductores" class="tab-pane">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-value" id="statDisponibles">0</div>
+                            <div class="stat-label">Disponibles</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="statOcupados">0</div>
+                            <div class="stat-label">Ocupados</div>
+                        </div>
+                    </div>
+                    <div id="listaConductores" class="lista-items">
+                        <!-- Se llenará dinámicamente -->
+                    </div>
+                </div>
+
+                <!-- Tab Nuevo Pedido -->
+                <div id="tab-nuevo" class="tab-pane">
+                    <form id="formNuevoPedido" class="form">
+                        <h3>Información del Cliente</h3>
+                        <div class="form-group">
+                            <label>Nombre del Cliente *</label>
+                            <input type="text" id="clienteNombre" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Teléfono</label>
+                            <input type="tel" id="clienteTelefono">
+                        </div>
+
+                        <h3>Ubicación de Recogida</h3>
+                        <div class="form-group">
+                            <label>Dirección de Origen *</label>
+                            <input type="text" id="origenDireccion" required placeholder="Click en el mapa o escribe">
+                            <button type="button" id="btnSeleccionarOrigen" class="btn-secondary">
+                                📍 Seleccionar en Mapa
+                            </button>
+                        </div>
+
+                        <h3>Destino</h3>
+                        <div class="form-group">
+                            <label>Dirección de Destino *</label>
+                            <input type="text" id="destinoDireccion" required placeholder="Click en el mapa o escribe">
+                            <button type="button" id="btnSeleccionarDestino" class="btn-secondary">
+                                📍 Seleccionar en Mapa
+                            </button>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Notas</label>
+                            <textarea id="pedidoNotas" rows="3"></textarea>
+                        </div>
+
+                        <div id="resumenPedido" class="resumen-pedido hidden">
+                            <h4>Resumen del Pedido</h4>
+                            <div class="resumen-item">
+                                <span>Distancia:</span>
+                                <strong id="resumenDistancia">-</strong>
+                            </div>
+                            <div class="resumen-item">
+                                <span>Tiempo estimado:</span>
+                                <strong id="resumenTiempo">-</strong>
+                            </div>
+                            <div class="resumen-item">
+                                <span>Precio:</span>
+                                <strong id="resumenPrecio">-</strong>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-primary">Crear Pedido</button>
+                    </form>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Mapa -->
+        <main class="map-container">
+            <button id="btnToggleSidebar" class="btn-toggle-sidebar">☰</button>
+            
+            <!-- Selector de Ciudad -->
+            <div class="city-selector">
+                <select id="selectCiudad" class="select-ciudad">
+                    <option value="">Seleccionar ciudad...</option>
+                </select>
+            </div>
+
+            <!-- Controles del Mapa -->
+            <div class="map-controls">
+                <button id="btnCenterMap" class="map-control-btn" title="Centrar mapa">🎯</button>
+                <button id="btnMyLocation" class="map-control-btn" title="Mi ubicación">📍</button>
+            </div>
+
+            <!-- Mapa -->
+            <div id="map"></div>
+
+            <!-- Leyenda -->
+            <div class="map-legend">
+                <div class="legend-item">
+                    <span class="legend-marker disponible"></span>
+                    <span>Disponible</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-marker ocupado"></span>
+                    <span>Ocupado</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-marker inactivo"></span>
+                    <span>Inactivo</span>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal de Detalle de Pedido -->
+    <div id="modalDetallePedido" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitulo">Detalle del Pedido</h2>
+                <button class="btn-close" id="btnCloseModal">✕</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Se llenará dinámicamente -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+    <script src="mapa.js"></script>
+    <script src="pedidos.js"></script>
+    <script src="conductores.js"></script>
+    
+    <!-- Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js')
+                .then(reg => console.log('Service Worker registrado', reg))
+                .catch(err => console.log('Error al registrar SW', err));
+        }
+    </script>
+</body>
+</html>

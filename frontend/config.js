@@ -3,15 +3,17 @@
 // ============================================
 
 // IMPORTANTE: Reemplaza estos valores con los de tu proyecto de Supabase
-// Los encuentras en: https://supabase.com/dashboard/project/TU_PROYECTO/settings/api
-
 const SUPABASE_CONFIG = {
-    url: 'https://kwgjkhlpswjrzdpoewxx.supabase.co', // Ejemplo: https://abcdefghijklmnop.supabase.co
+    url: 'https://kwgjkhlpswjrzdpoewxx.supabase.coL', // Ejemplo: https://abcdefghijklmnop.supabase.co
     anonKey: 'sb_publishable_BEgCcvdUCM_kNWUb089Dvg_UB99FcTQ' // Es la clave pública, es seguro exponerla
 };
 
 // Inicializar cliente de Supabase
-const supabase = supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+const { createClient } = supabase;
+const supabaseClient = createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+
+// Alias global para usar en otros archivos
+window.supabase = supabaseClient;
 
 // ============================================
 // CONFIGURACIÓN DEL MAPA
@@ -58,7 +60,7 @@ const PRICING_CONFIG = {
     // Se puede sobreescribir desde la base de datos
     async cargarDesdeDB() {
         try {
-            const { data, error } = await supabase
+            const { data, error } = await window.supabase
                 .from('configuracion')
                 .select('clave, valor')
                 .in('clave', ['precio_base_km', 'precio_minimo']);
@@ -106,7 +108,7 @@ const UPDATE_CONFIG = {
 const CIUDADES = {
     async cargarCiudades() {
         try {
-            const { data, error } = await supabase
+            const { data, error } = await window.supabase
                 .from('ciudades')
                 .select('*')
                 .eq('activo', true)

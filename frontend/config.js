@@ -6,8 +6,8 @@
 // Los encuentras en: https://supabase.com/dashboard/project/TU_PROYECTO/settings/api
 
 const SUPABASE_CONFIG = {
-    url: 'TU_SUPABASE_URL', // Ejemplo: https://abcdefghijklmnop.supabase.co
-    anonKey: 'TU_SUPABASE_ANON_KEY' // Es la clave pública, es seguro exponerla
+    url: 'https://kwgjkhlpswjrzdpoewxx.supabase.co', // Ejemplo: https://abcdefghijklmnop.supabase.co
+    anonKey: 'sb_publishable_BEgCcvdUCM_kNWUb089Dvg_UB99FcTQ' // Es la clave pública, es seguro exponerla
 };
 
 // Inicializar cliente de Supabase

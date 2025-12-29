@@ -4,7 +4,7 @@
 
 // IMPORTANTE: Reemplaza estos valores con los de tu proyecto de Supabase
 const SUPABASE_CONFIG = {
-    url: 'https://kwgjkhlpswjrzdpoewxx.supabase.coL', // Ejemplo: https://abcdefghijklmnop.supabase.co
+    url: 'https://kwgjkhlpswjrzdpoewxx.supabase.co', // Ejemplo: https://abcdefghijklmnop.supabase.co
     anonKey: 'sb_publishable_BEgCcvdUCM_kNWUb089Dvg_UB99FcTQ' // Es la clave pública, es seguro exponerla
 };
 
